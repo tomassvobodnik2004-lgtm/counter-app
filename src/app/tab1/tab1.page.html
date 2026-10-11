@@ -10,13 +10,13 @@
     (saved)="onSaved($event)"
   ></app-counter>
 
-  @if (savedCounters.length > 0) {
+  @if (counters().length > 0) {
     <ion-list>
       <ion-list-header>
         <ion-label>Uložená počítadla</ion-label>
       </ion-list-header>
 
-      @for (counter of savedCounters; track counter.id) {
+      @for (counter of counters(); track counter.id) {
         <ion-item>
           <ion-label>
             <h2>{{ counter.name }}</h2>
