@@ -1,8 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { CounterService } from './counter';
 
-// Mock pro localStorage, aby Capacitor Preferences nepadaly
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
@@ -41,5 +40,23 @@ describe('CounterService', () => {
 
     expect(service.counters()).toHaveLength(1);
     expect(service.counters()[0]).toEqual(counter);
+  });
+
+  it('should remove a single counter by id', async () => {
+    await service.saveCounter({ id: '1', name: 'První', value: 2 });
+    await service.saveCounter({ id: '2', name: 'Druhé', value: 4 });
+
+    expect(service.counters()).toHaveLength(2);
+
+    await service.removeCounter('1');
+    expect(service.counters()).toHaveLength(1);
+    expect(service.counters()[0].id).toBe('2');
+  });
+
+  it('should clear all counters', async () => {
+    await service.saveCounter({ id: '1', name: 'První', value: 2 });
+    await service.clearAll();
+
+    expect(service.counters()).toHaveLength(0);
   });
 });
