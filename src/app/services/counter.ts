@@ -21,20 +21,31 @@ export class CounterService {
         this.counters.set(parsed);
       }
     } catch (e) {
-      // Ignorujeme chyby úložiště v testovacím prostředí
+
     }
   }
 
   async saveCounter(counter: SavedCounter): Promise<void> {
     const updated = [counter, ...this.counters()];
     this.counters.set(updated);
+    await this.persist(updated);
+  }
+  async removeCounter(counterId: string): Promise<void> {
+    const updated = this.counters().filter(c => c.id !== counterId);
+    this.counters.set(updated);
+    await this.persist(updated);
+  }
+  async clearAll(): Promise<void> {
+    this.counters.set([]);
+    await this.persist([]);
+  }
+  private async persist(counters: SavedCounter[]): Promise<void> {
     try {
       await Preferences.set({
         key: this.STORAGE_KEY,
-        value: JSON.stringify(updated),
+        value: JSON.stringify(counters),
       });
     } catch (e) {
-      // Ignorujeme chyby úložiště v testovacím prostředí
     }
   }
 }

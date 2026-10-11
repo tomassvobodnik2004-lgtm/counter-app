@@ -1,6 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>CounterApp</ion-title>
+    @if (counters().length > 0) {
+      <ion-buttons slot="end">
+        <ion-button color="danger" (click)="confirmClearAll()">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
   </ion-toolbar>
 </ion-header>
 
@@ -11,23 +18,63 @@
   ></app-counter>
 
   @if (counters().length > 0) {
+    <!-- Vyhledávání a řazení -->
+    <ion-searchbar
+      placeholder="Hledat podle názvu..."
+      (ionInput)="searchQuery.set($event.detail.value || '')"
+    ></ion-searchbar>
+
+    <ion-item>
+      <ion-label>Řadit podle</ion-label>
+      <ion-select
+        [value]="sortOrder()"
+        (ionChange)="sortOrder.set($event.detail.value)"
+      >
+        <ion-select-option value="newest">Nejnovější</ion-select-option>
+        <ion-select-option value="oldest">Nejstarší</ion-select-option>
+        <ion-select-option value="name">Název (A-Z)</ion-select-option>
+        <ion-select-option value="value">Hodnota (nejvyšší)</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Statistiky: Součet + Varianta A (Průměr) -->
+    <ion-list class="ion-margin-top">
+      <ion-item color="light">
+        <ion-label><strong>Součet hodnot:</strong></ion-label>
+        <ion-note slot="end" color="primary"><strong>{{ totalSum() }}</strong></ion-note>
+      </ion-item>
+      <ion-item color="light">
+        <ion-label><strong>Průměrná hodnota (Var A):</strong></ion-label>
+        <ion-note slot="end" color="secondary"><strong>{{ averageValue() }}</strong></ion-note>
+      </ion-item>
+    </ion-list>
+
+    <!-- Seznam počítadel s odsunutím pro smazání -->
     <ion-list>
       <ion-list-header>
-        <ion-label>Uložená počítadla</ion-label>
+        <ion-label>Uložená počítadla ({{ filteredCounters().length }})</ion-label>
       </ion-list-header>
 
-      @for (counter of counters(); track counter.id) {
-        <ion-item>
-          <ion-label>
-            <h2>{{ counter.name }}</h2>
-            <p>{{ counter.id }}</p>
-          </ion-label>
-          <ion-note slot="end">{{ counter.value }}</ion-note>
-        </ion-item>
+      @for (counter of filteredCounters(); track counter.id) {
+        <ion-item-sliding>
+          <ion-item>
+            <ion-label>
+              <h2>{{ counter.name }}</h2>
+              <p>{{ counter.id }}</p>
+            </ion-label>
+            <ion-note slot="end" class="ion-text-bold">{{ counter.value }}</ion-note>
+          </ion-item>
+
+          <ion-item-options slot="end">
+            <ion-item-option color="danger" (click)="onDeleteSingle(counter.id)">
+              Smazat
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
       }
     </ion-list>
   } @else {
-    <p class="empty-state">
+    <p class="empty-state ion-text-center ion-margin-top">
       Zatím nebylo uloženo žádné počítadlo.
     </p>
   }
